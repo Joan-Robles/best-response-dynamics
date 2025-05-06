@@ -42,7 +42,7 @@ Because the game is random, there is no guarantee that a pure-strategy Nash equi
 To investigate best-response dynamics, we simulate an iterative play process in R for each random game instance. The high-level procedure for each simulation is as follows:
 
 **Initialization:**
-- Start at a fixed initial strategy profile. In our code, we use the profile of all zeros (i.e., $(0,0,\dots,0)$ where every player initially plays strategy 0 as the starting point. Given the fact that the utilities are random, this profile is not special.
+- Start at a fixed initial strategy profile. In our code, we use the profile where every player initially plays strategy 0 as the starting point. Given the fact that the utilities are random, this profile is not special.
 
 - Initialize a logical vector that indicates whether each player agrees with the strategy. Set all values to `FALSE` initially.  
 
@@ -80,7 +80,7 @@ Along with a decreased chance of success, larger games required more update step
 
 ### Example Plots
 
-The repository includes plots visualizing these results for various $n$. In the `plots/` directory, you will find images named `game_results_2.png`, `game_results_4.png`, `game_results_6.png`, `game_results_8.png`, and `game_results_10.png`. Each plot corresponds to simulations at a given number of players and shows the fraction of runs that converged to a PSNE, along with a histogram of the iteration counts. Below are the plots for $n=2$, $n=6$, and $n=10$, illustrating the trends described:
+The repository includes plots visualizing these results for various $n$. In the `plots/` directory, you will find images named `game_results_2.png`, `game_results_4.png`, `game_results_6.png`, `game_results_8.png`, and `game_results_10.png`. Each plot corresponds to simulations at a given number of players and shows the fraction of runs that converged to a PSNE, along with a histogram of the iteration counts. Below are the plots for $n=2$, $n=4$, and $n=10$, illustrating the trends described:
 
 - For $n=2$ players: The plot shows that almost all runs converged, usually in very few iterations.  
   ![Simulation outcomes for n=2](plots/game_results_2_players.png)  
@@ -94,7 +94,7 @@ The repository includes plots visualizing these results for various $n$. In the 
   ![Simulation outcomes for n=10](plots/game_results_10_players.png)  
   **Figure 3**: Simulation outcomes for $n=10$. 
 
-These plots confirm that as the game grows more complex (in terms of number of players), finding a stable outcome via naive best-response play becomes significantly less likely and more time-consuming. In summary, small games may reach a stable equilibrium easily, but larger random games often exhibit persistent oscillations with no equilibrium, in line with theoretical expectations .
+These plots confirm that as the game grows more complex (in terms of number of players), finding a stable outcome via naive best-response play becomes significantly less likely and more time-consuming. In summary, small games may reach a stable equilibrium easily, but larger random games often exhibit persistent oscillations with no equilibrium, in line with theoretical expectations.
 
 ## Future work
 
