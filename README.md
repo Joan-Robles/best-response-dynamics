@@ -80,8 +80,6 @@ Along with a decreased chance of success, larger games required more update step
 
 ### Example Plots
 
-### Example Plots
-
 The repository includes plots visualizing these results for various $n$. In the `plots/` directory, you will find images named `game_results_2.png`, `game_results_4.png`, `game_results_6.png`, `game_results_8.png`, and `game_results_10.png`. Each plot corresponds to simulations at a given number of players and shows the fraction of runs that converged to a PSNE, along with a histogram of the iteration counts. Below are the plots for $n=2$, $n=6$, and $n=10$, illustrating the trends described:
 
 - For $n=2$ players: The plot shows that almost all runs converged, usually in very few iterations.  
