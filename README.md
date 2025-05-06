@@ -1,12 +1,23 @@
 # Best-Response Dynamics in Random $n$-Player Games
-
 ## Introduction
 
-In game theory, a Nash equilibrium (NE) is a strategy profile in which no player can unilaterally increase their payoff by deviating to a different strategy. Formally, for an $n$-player normal-form game with players $N = \{1, 2, \dots, n\}$, strategy sets $S_i$ for each player $i$, and payoff functions $u_i: S_1 \times \dots \times S_n \to \mathbb{R}$, a profile $s^* = (s_1^*, \dots, s_n^*)$ is a pure strategy Nash equilibrium (PSNE) if for every player $i$ and any alternative strategy $s_i' \in S_i$, we have: $u_i(s_i^*, s_{-i}^*) \geq u_i(s_i', s_{-i}^*)$, where $s_{-i}^*$ denotes the strategies of all players other than $i$. In other words, given the other players' choices, no single player can improve their utility by switching strategies. If the equilibrium allows randomized strategies, it is a mixed-strategy NE, but here we focus on pure strategies. 
+In game theory, a Nash equilibrium (NE) is a strategy profile in which no player can unilaterally increase their payoff by deviating to a different strategy. Formally, for an $n$-player normal-form game with players $N = \{1, 2, \dots, n\}$, strategy sets $S_i$ for each player $i$, and payoff functions $u_i: S_1 \times \dots \times S_n \to \mathbb{R}$, a profile $s^* = (s_1^*, \dots, s_n^*)$ is a pure strategy Nash equilibrium (PSNE) if for every player $i$ and any alternative strategy $s_i' \in S_i$, we have:
 
-Best-response dynamics is an iterative process used to find a NE (if one exists) by simulating how players might myopically adjust their strategies. In this dynamic, players take turns updating their strategy to their current best response given the other players' strategies. A best response for player $i$ to a profile $s$ is any strategy $s_i' \in S_i$ that maximizes $u_i(s_i', s_{-i})$. We denote the best-response correspondence as $BR_i(s_{-i}) = \arg\max_{a \in S_i} u_i(a, s_{-i})$. Starting from some initial profile $s(0)$, the process generates a sequence $s(1), s(2), \dots$ where at each step one player $i$ is selected and switches $s_i(t)$ to a best response $s_i(t+1) \in BR_i(s_{-i}(t))$. If the process reaches a profile where every player is already playing a best response to the others, then no one will switch—this profile is a Nash equilibrium (a fixed point of the dynamic).
+$$
+u_i(s_i^*, s_{-i}^*) \geq u_i(s_i', s_{-i}^*),
+$$
 
-However, in general games, the best-response dynamic is not guaranteed to converge; it may cycle through states indefinitely if no equilibrium is reachable. For example, the classic Matching Pennies game has no PSNE, and best-response play will oscillate. In some cases the convergence depends on the strategy profile selected to initialize de algorithm.
+where $s_{-i}^*$ denotes the strategies of all players other than $i$. In other words, given the other players' choices, no single player can improve their utility by switching strategies. If the equilibrium allows randomized strategies, it is a mixed-strategy NE, but here we focus on pure strategies.
+
+Best-response dynamics is an iterative process used to find a NE (if one exists) by simulating how players might myopically adjust their strategies. In this dynamic, players take turns updating their strategy to their current best response given the other players' strategies. A best response for player $i$ to a profile $s$ is any strategy $s_i' \in S_i$ that maximizes $u_i(s_i', s_{-i})$. We denote the best-response correspondence as:
+
+$$
+BR_i(s_{-i}) = \arg\max_{a \in S_i} u_i(a, s_{-i}).
+$$
+
+Starting from some initial profile $s(0)$, the process generates a sequence $s(1), s(2), \dots$ where at each step one player $i$ is selected and switches $s_i(t)$ to a best response $s_i(t+1) \in BR_i(s_{-i}(t))$. If the process reaches a profile where every player is already playing a best response to the others, then no one will switch—this profile is a Nash equilibrium (a fixed point of the dynamic).
+
+However, in general games, the best-response dynamics is not guaranteed to converge; it may cycle through states indefinitely if no equilibrium is reachable. For example, the classic Matching Pennies game has no PSNE, and best-response play will oscillate. In some cases, the convergence depends on the strategy profile selected to initialize the algorithm.
 
 ## Motivation
 
@@ -72,17 +83,17 @@ Along with a decreased chance of success, larger games required more update step
 The repository includes plots visualizing these results for various $n$. In the `plots/` directory, you will find images named `game_results_2.png`, `game_results_4.png`, `game_results_6.png`, `game_results_8.png`, and `game_results_10.png`. Each plot corresponds to simulations at a given number of players and shows the fraction of runs that converged to a PSNE, along with a histogram of the iteration counts. Below are the plots for $n=2$, $n=6$, and $n=10$, illustrating the trends described:
 
 - For $n=2$ players: The plot shows that almost all runs converged, usually in very few iterations.  
-  ![Simulation outcomes for n=2](plots/game_results_2.png)  
+  ![Simulation outcomes for n=2](plots/game_results_2_players.png)  
   **Figure 1**: Simulation outcomes for $n=2$.
 
 - For $n=4$ players: The plot illustrates a mix of outcomes. Many runs still found an equilibrium, but a significant number resulted in cycles. The iteration count histogram is more spread out compared to $n=2$, indicating some games took longer to resolve.  
-  ![Simulation outcomes for n=4](plots/game_results_4.png)  
+  ![Simulation outcomes for n=4](plots/game_results_4_players.png)  
   **Figure 2**: Simulation outcomes for $n=4$.
 
 - For $n=10$ players: The plot highlights that convergence was very rare. Most simulations ended in cycling behavior, and the iteration counts were often quite large before a cycle was detected.  
-  ![Simulation outcomes for n=10](plots/game_results_10.png)  
+  ![Simulation outcomes for n=10](plots/game_results_10_players.png)  
   **Figure 3**: Simulation outcomes for $n=10$. 
-  
+
 These plots confirm that as the game grows more complex (in terms of number of players), finding a stable outcome via naive best-response play becomes significantly less likely and more time-consuming. In summary, small games may reach a stable equilibrium easily, but larger random games often exhibit persistent oscillations with no equilibrium, in line with theoretical expectations .
 
 ## Future work
@@ -97,3 +108,5 @@ This simulation provides insights into best-response dynamics in random $n$-play
 - **Expansion to More Strategy Choices**: The current setup assumes each player has exactly two strategies (0 or 1), leading to $2^n$ possible profiles. Generalizing the simulation to allow more than two strategies per player (e.g., $k$ strategies, resulting in $k^n$ profiles) would make the model more realistic and applicable to a broader range of games. This would also allow us to study how the increased strategy space affects convergence rates and the likelihood of finding a PSNE.
 
 - **Structured Utility Functions**: The payoffs in this simulation are drawn randomly from a uniform distribution, creating games with no inherent structure. Future work could introduce structure to the utility functions, such as imposing symmetry, correlation, or specific game-theoretic properties (e.g., modeling potential games or coordination games). This would enable the study of best-response dynamics in more realistic or domain-specific scenarios, potentially improving convergence behavior or revealing new patterns in equilibrium formation.
+
+- **Computational complexity**: Deepen in the computational complexity of the algorithm. Find boundaries for the number of iterations. 

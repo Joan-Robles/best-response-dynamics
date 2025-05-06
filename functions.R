@@ -110,7 +110,7 @@ play_game <- function(n_players, game) {
   strategy        <- integer(n_players)
   agree_status    <- rep(FALSE, n_players)
   used_strategies <- rbind(strategy)
-  iteration_count <- 0L
+  iteration_count <- 0L 
   all_agree       <- rep(TRUE, n_players)
 
   while (!all(all_agree == agree_status)) {
@@ -171,14 +171,14 @@ run_many_games <- function(n_games, n_players) {
 summary_game_results <- function(res_mat, n_players) {
   df <- as.data.frame(res_mat, stringsAsFactors = FALSE)
   names(df) <- c("status", "iterations")
-  df$iterations <- as.numeric(df$iterations)
-
+  df$iterations <- as.integer(as.numeric(df$iterations))
+  
   sts    <- unique(df$status)
   counts <- table(df$status)
   total  <- sum(counts)
   pct    <- round((counts / total) * 100, 1)
   colors <- c("steelblue", "tomato")[seq_along(sts)]
-
+  
   oldpar <- par(no.readonly = TRUE)
   on.exit(par(oldpar), add = TRUE)
   par(
@@ -186,23 +186,27 @@ summary_game_results <- function(res_mat, n_players) {
     mar   = c(4, 4, 3, 1),
     oma   = c(0, 0, 3, 0)
   )
-
+  
   for (i in seq_along(sts)) {
     st  <- sts[i]
     its <- df$iterations[df$status == st]
     n   <- counts[st]
     p   <- pct[st]
-    hist(
-      its,
-      breaks = "FD",
-      main   = paste0(st, " (n=", n, ", ", p, "%)"),
-      xlab   = "Iterations",
-      ylab   = "Frequency",
-      col    = colors[i],
-      border = NA
+    
+    # discrete barplot of integer iteration counts
+    cnts <- table(its)
+    
+    barplot(
+      cnts,
+      main     = paste0(st, " (n=", n, ", ", p, "%)"),
+      xlab     = "Iterations",
+      ylab     = "Frequency",
+      col      = colors[i],
+      border   = NA,
+      space    = 0.2
     )
   }
-
+  
   mtext(
     text  = paste("Number of players:", n_players),
     side  = 3,
