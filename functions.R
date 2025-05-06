@@ -101,7 +101,7 @@ get_player_move <- function(game, selected_player, strategy, agree_status, is_ne
 #' @param n_players Integer. Number of players.
 #' @param game Numeric payoff array from `set_game()`.
 #' @return Character vector of length 2:
-#'   1. Status: "Equilibrio encontrado" or "Equilibrio no encontrado"
+#'   1. Status: "Equilibrium found" or "Equilibrium not found"
 #'   2. Number of iterations performed.
 #' @examples
 #' play_game(3, set_game(3))
@@ -124,12 +124,12 @@ play_game <- function(n_players, game) {
     if (res$is_new) {
       used_strategies <- rbind(used_strategies, strategy)
       if (has_dup_rows(used_strategies)) {
-        return(c("Equilibrio no encontrado", iteration_count))
+        return(c("Equilibrium not found", iteration_count))
       }
     }
   }
 
-  c("Equilibrio encontrado", iteration_count)
+  c("Equilibrium found", iteration_count)
 }
 
 #' Run multiple games and collect results
@@ -196,15 +196,15 @@ summary_game_results <- function(res_mat, n_players) {
       its,
       breaks = "FD",
       main   = paste0(st, " (n=", n, ", ", p, "%)"),
-      xlab   = "Iteraciones",
-      ylab   = "Frecuencia",
+      xlab   = "Iterations",
+      ylab   = "Frequency",
       col    = colors[i],
       border = NA
     )
   }
 
   mtext(
-    text  = paste("Número de jugadores:", n_players),
+    text  = paste("Number of players:", n_players),
     side  = 3,
     outer = TRUE,
     cex   = 1.5,
