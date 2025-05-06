@@ -196,8 +196,8 @@ summary_game_results <- function(res_mat, n_players) {
       its,
       breaks = "FD",
       main   = paste0(st, " (n=", n, ", ", p, "%)"),
-      xlab   = "Iterations",
-      ylab   = "",
+      xlab   = "Iteraciones",
+      ylab   = "Frecuencia",
       col    = colors[i],
       border = NA
     )
