@@ -76,7 +76,7 @@ The repository includes plots visualizing these results for various $n$. In the 
   **Figure 1**: Simulation outcomes for $n=2$.
 
 - For $n=4$ players: The plot illustrates a mix of outcomes. Many runs still found an equilibrium, but a significant number resulted in cycles. The iteration count histogram is more spread out compared to $n=2$, indicating some games took longer to resolve.  
-  ![Simulation outcomes for n=4](plots/game_results_6.png)  
+  ![Simulation outcomes for n=4](plots/game_results_4.png)  
   **Figure 2**: Simulation outcomes for $n=4$.
 
 - For $n=10$ players: The plot highlights that convergence was very rare. Most simulations ended in cycling behavior, and the iteration counts were often quite large before a cycle was detected.  
