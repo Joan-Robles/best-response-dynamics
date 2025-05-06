@@ -1,10 +1,12 @@
 # Best-Response Dynamics in Random $n$-Player Games
 ## Introduction
 
-In game theory, a Nash equilibrium (NE) is a strategy profile in which no player can unilaterally increase their payoff by deviating to a different strategy. Formally, for an $n$-player normal-form game with players $N = \{1, 2, \dots, n\}$, strategy sets $S_i$ for each player $i$, and payoff functions $u_i: S_1 \times \dots \times S_n \to \mathbb{R}$, a profile $s^* = (s_1^*, \dots, s_n^*)$ is a pure strategy Nash equilibrium (PSNE) if for every player $i$ and any alternative strategy $s_i' \in S_i$, we have:
+In game theory, a Nash equilibrium (NE) is a strategy profile in which no player can unilaterally increase their payoff by deviating to a different strategy. Formally, for an $n$-player normal-form game with players $N = \{1, 2, \dots, n\}$, strategy sets $S_i$ for each player $i$, and payoff functions $u_i: S_1 \times \dots \times S_n \to \mathbb{R}$, a profile $s^{\ast} = (s_{1}^{\ast}, \dots, s_{n}^{\ast})$ is a pure strategy Nash equilibrium (PSNE) if for every player $i$ and any alternative strategy $s_i' \in S_i$, we have:
 
 $$
-u_i(s_i^*, s_{-i}^*) \geq u_i(s_i', s_{-i}^*),
+u_i\bigl(s_i^\ast,s_{-i}^\ast\bigr)
+\ge
+u_i\bigl(s_i',s_{-i}^\ast\bigr).
 $$
 
 where $s_{-i}^*$ denotes the strategies of all players other than $i$. In other words, given the other players' choices, no single player can improve their utility by switching strategies. If the equilibrium allows randomized strategies, it is a mixed-strategy NE, but here we focus on pure strategies.
