@@ -16,6 +16,7 @@ set_game <- function(n_players, strategies = 2) {
   game
 }
 
+
 #' Find first FALSE in a logical vector
 #'
 #' Returns the index of the first `FALSE` value in `x`, or `NA_integer_` if none.
@@ -28,6 +29,7 @@ set_game <- function(n_players, strategies = 2) {
 #' @export
 first_false <- function(x) match(FALSE, x, nomatch = NA_integer_)
 
+
 #' Flip binary vector elements (0 ↔ 1)
 #'
 #' Transforms 0s to 1s and 1s to 0s in a numeric or integer vector.
@@ -38,6 +40,7 @@ first_false <- function(x) match(FALSE, x, nomatch = NA_integer_)
 #' flip01(c(0, 1, 0, 1)) # c(1, 0, 1, 0)
 #' @export
 flip01 <- function(x) { 1L - as.integer(x) }
+
 
 #' Check for duplicate rows in a matrix or data.frame
 #'
@@ -50,6 +53,7 @@ flip01 <- function(x) { 1L - as.integer(x) }
 has_dup_rows <- function(m) {
   anyDuplicated(as.data.frame(m)) > 0L
 }
+
 
 #' Determine a player's next move in the game
 #'
@@ -94,6 +98,7 @@ get_player_move <- function(game, selected_player, strategy, agree_status, is_ne
   )
 }
 
+
 #' Play a single game until equilibrium or cycle detection
 #'
 #' Iteratively applies `get_player_move()` until all players agree or a strategy profile repeats.
@@ -111,6 +116,7 @@ play_game <- function(n_players, game) {
   agree_status    <- rep(FALSE, n_players)
   used_strategies <- rbind(strategy)
   iteration_count <- 0L 
+  movements_count  <- 0L
   all_agree       <- rep(TRUE, n_players)
 
   while (!all(all_agree == agree_status)) {
@@ -123,14 +129,20 @@ play_game <- function(n_players, game) {
 
     if (res$is_new) {
       used_strategies <- rbind(used_strategies, strategy)
+
+      # Count the number of movements
+      movements_count <- movements_count + 1L
+
+      # Break if loop detected
       if (has_dup_rows(used_strategies)) {
-        return(c("Equilibrium not found", iteration_count))
+        return(c("Equilibrium not found", iteration_count, movements_count))
       }
     }
   }
 
-  c("Equilibrium found", iteration_count)
+  c("Equilibrium found", iteration_count, movements_count)
 }
+
 
 #' Run multiple games and collect results
 #'
@@ -152,33 +164,40 @@ run_many_games <- function(n_games, n_players) {
   ))
   df <- as.data.frame(mat, stringsAsFactors = FALSE)
   names(df) <- c("status", "iterations")
+
+  # order the data frame by status (alphabetically)
+  df <- df[order(df$status), ]
   df$iterations <- as.numeric(df$iterations)
   df
 }
 
-#' Summarize and plot game results
+
+#' Summarize and plot game results with iterations and movements
 #'
-#' Prints counts and percentages of statuses, and draws histograms of iterations
-#' per status with overall number of players in main title.
+#' Overlaid barplots of integer counts for both iterations and movements,
+#' using the original color palette, with a cleaned-up x-axis showing
+#' only “pretty” integer ticks. Adds a legend and displays the total number
+#' of players as an outer title.
 #'
-#' @param res_mat Data.frame or matrix with columns `status` and `iterations`.
-#' @param n_players Integer. Number of players used in simulations.
-#' @return Invisibly returns `NULL`, prints summary and plots histograms.
+#' @param res_mat Data.frame or matrix with columns `status`, `iterations`, and `movements`.
+#' @param n_players Integer. Number of players used in the simulations.
+#' @return Invisibly returns `NULL`; prints overlaid barplots.
 #' @examples
 #' res <- run_many_games(100, 4)
 #' summary_game_results(res, 4)
 #' @export
 summary_game_results <- function(res_mat, n_players) {
   df <- as.data.frame(res_mat, stringsAsFactors = FALSE)
-  names(df) <- c("status", "iterations")
-  df$iterations <- as.integer(as.numeric(df$iterations))
-  
-  sts    <- unique(df$status)
-  counts <- table(df$status)
-  total  <- sum(counts)
-  pct    <- round((counts / total) * 100, 1)
-  colors <- c("steelblue", "tomato")[seq_along(sts)]
-  
+  names(df) <- c("status", "iterations", "movements")
+  df$iterations <- as.integer(df$iterations)
+  df$movements  <- as.integer(df$movements)
+
+  sts      <- unique(df$status)
+  counts   <- table(df$status)
+  pct      <- round((counts / sum(counts)) * 100, 1)
+  base_cols <- c("steelblue", "green4")[seq_along(sts)]
+  mov_col   <- "tomato"
+
   oldpar <- par(no.readonly = TRUE)
   on.exit(par(oldpar), add = TRUE)
   par(
@@ -186,27 +205,53 @@ summary_game_results <- function(res_mat, n_players) {
     mar   = c(4, 4, 3, 1),
     oma   = c(0, 0, 3, 0)
   )
-  
+
   for (i in seq_along(sts)) {
     st  <- sts[i]
     its <- df$iterations[df$status == st]
+    mov <- df$movements[df$status == st]
     n   <- counts[st]
     p   <- pct[st]
-    
-    # discrete barplot of integer iteration counts
-    cnts <- table(its)
-    
+
+    cnts_its <- table(its)
+    cnts_mov <- table(mov)
+    vals     <- sort(unique(c(as.integer(names(cnts_its)), as.integer(names(cnts_mov)))))
+
+    # Plot iterations (no x-labels yet), capture bar midpoints
+    mids <- barplot(
+      cnts_its[as.character(vals)],
+      names.arg = NA,
+      col       = adjustcolor(base_cols[i], alpha.f = 0.8),
+      border    = NA,
+      space     = 0,
+      ylim      = c(0, max(cnts_its, cnts_mov)),
+      main      = paste0(st, " (n=", n, ", ", p, "%)"),
+      xlab      = "Value",
+      ylab      = "Frequency"
+    )
+    # Overlay movements
     barplot(
-      cnts,
-      main     = paste0(st, " (n=", n, ", ", p, "%)"),
-      xlab     = "Iterations",
-      ylab     = "Frequency",
-      col      = colors[i],
-      border   = NA,
-      space    = 0.2
+      cnts_mov[as.character(vals)],
+      names.arg = NA,
+      col       = adjustcolor(mov_col, alpha.f = 0.8),
+      border    = NA,
+      space     = 0,
+      add       = TRUE
+    )
+
+    # Add a clean, integer-based axis
+    pretty_vals <- pretty(vals)
+    pretty_vals <- pretty_vals[pretty_vals %in% vals]
+    axis(1, at = mids[match(pretty_vals, vals)], labels = pretty_vals)
+
+    legend(
+      "topright",
+      legend = c("Iterations", "Movements"),
+      fill   = c(adjustcolor(base_cols[i], alpha.f = 0.8), adjustcolor(mov_col, alpha.f = 0.8)),
+      bty    = "n"
     )
   }
-  
+
   mtext(
     text  = paste("Number of players:", n_players),
     side  = 3,
