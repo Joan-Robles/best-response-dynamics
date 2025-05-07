@@ -72,7 +72,7 @@ We analyzed the outcomes of the best-response dynamics over 100000 games and dif
 
 ### Frequency of Convergence
 
-For small games, the best-response dynamics often converges to a PSNE. For example, with $n=2$ players (each with 2 strategies), the algorithm finds a PSNE in 87.3% of the games, while with $n=10$ players, only 1.5% of the games converge to a PSNE. Note that the algorithm cannot conclude there are no PSNEs; it only determines that no PSNE was found along the trajectory. 
+For small games, the best-response dynamics often converges to a PSNE. For example, with $n=2$ players (each with 2 strategies), the algorithm finds a PSNE in 87.3% of the games, while with $n=12$ players, less than 1% of the games converge to a PSNE. Note that the algorithm cannot conclude there are no PSNEs; it only determines that no PSNE was found along the trajectory. 
 
 ### Iterations Distribution
 
@@ -80,19 +80,19 @@ Along with a decreased chance of success, larger games required more update step
 
 ### Example Plots
 
-The repository includes plots visualizing these results for various $n$. In the `plots/` directory, you will find images named `game_results_2.png`, `game_results_4.png`, `game_results_6.png`, `game_results_8.png`, and `game_results_10.png`. Each plot corresponds to simulations at a given number of players and shows the fraction of runs that converged to a PSNE, along with a histogram of the iteration counts. Below are the plots for $n=2$, $n=4$, and $n=10$, illustrating the trends described:
+The repository includes plots visualizing these results for various $n$. In the `plots/` directory. Each plot corresponds to 100000 simulations at a given number of players and shows the fraction of runs that converged to a PSNE, along with a histogram of the iteration counts. Below are the plots for $n=2$, $n=4$, and $n=10$, illustrating the trends described:
 
 - For $n=2$ players: The plot shows that almost all runs converged, usually in very few iterations.  
   ![Simulation outcomes for n=2](plots/game_results_2_players.png)  
   **Figure 1**: Simulation outcomes for $n=2$.
 
-- For $n=4$ players: The plot illustrates a mix of outcomes. Many runs still found an equilibrium, but a significant number resulted in cycles. The iteration count histogram is more spread out compared to $n=2$, indicating some games took longer to resolve.  
+- For $n=4$ players: The plot illustrates a mix of outcomes. Many runs still found an equilibrium, but a significant number resulted in cycles. The distribution is about fifty-fifty. The iteration count histogram is more spread out compared to $n=2$, indicating some games took longer to resolve.  
   ![Simulation outcomes for n=4](plots/game_results_4_players.png)  
   **Figure 2**: Simulation outcomes for $n=4$.
 
-- For $n=10$ players: The plot highlights that convergence was very rare. Most simulations ended in cycling behavior, and the iteration counts were often quite large before a cycle was detected.  
-  ![Simulation outcomes for n=10](plots/game_results_10_players.png)  
-  **Figure 3**: Simulation outcomes for $n=10$. 
+- For $n=12$ players: The plot highlights that convergence was very rare. Most simulations ended in cycling behavior, and the iteration counts were often quite large before a cycle was detected.  
+  ![Simulation outcomes for n=10](plots/game_results_12_players.png)  
+  **Figure 3**: Simulation outcomes for $n=12$. 
 
 These plots confirm that as the game grows more complex (in terms of number of players), finding a stable outcome via naive best-response play becomes significantly less likely and more time-consuming. In summary, small games may reach a stable equilibrium easily, but larger random games often exhibit persistent oscillations with no equilibrium, in line with theoretical expectations.
 
