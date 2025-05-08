@@ -1,3 +1,7 @@
+# Call the general functions
+source("general_functions.R")
+
+
 #' Set up a random game payoff array
 #'
 #' Creates an n-dimensional array of uniform payoffs for a game with `n_players` and
@@ -14,44 +18,6 @@ set_game <- function(n_players, strategies = 2) {
   array_size <- c(n_players, rep(strategies, n_players))
   game <- array(data = runif(prod(array_size)), dim = array_size)
   game
-}
-
-
-#' Find first FALSE in a logical vector
-#'
-#' Returns the index of the first `FALSE` value in `x`, or `NA_integer_` if none.
-#'
-#' @param x Logical vector to search.
-#' @return Integer index of first FALSE, or `NA_integer_` if no FALSE is found.
-#' @examples
-#' first_false(c(TRUE, TRUE, FALSE, TRUE)) # 3
-#' first_false(c(TRUE, TRUE))               # NA
-#' @export
-first_false <- function(x) match(FALSE, x, nomatch = NA_integer_)
-
-
-#' Flip binary vector elements (0 ↔ 1)
-#'
-#' Transforms 0s to 1s and 1s to 0s in a numeric or integer vector.
-#'
-#' @param x Numeric or integer vector containing only 0s and 1s.
-#' @return Integer vector with values flipped (1 becomes 0, 0 becomes 1).
-#' @examples
-#' flip01(c(0, 1, 0, 1)) # c(1, 0, 1, 0)
-#' @export
-flip01 <- function(x) { 1L - as.integer(x) }
-
-
-#' Check for duplicate rows in a matrix or data.frame
-#'
-#' @param m Matrix or data.frame whose rows will be checked.
-#' @return Logical `TRUE` if any duplicate rows exist, otherwise `FALSE`.
-#' @examples
-#' has_dup_rows(matrix(c(1,2,3,1,2,3), nrow = 2, byrow = TRUE)) # TRUE
-#' has_dup_rows(matrix(1:4, nrow = 2))                            # FALSE
-#' @export
-has_dup_rows <- function(m) {
-  anyDuplicated(as.data.frame(m)) > 0L
 }
 
 
@@ -118,16 +84,17 @@ play_game <- function(n_players, game) {
   iteration_count <- 0L 
   movements_count  <- 0L
   all_agree       <- rep(TRUE, n_players)
+  full_game <- cartesian_binary(n_players)
 
   while (!all(all_agree == agree_status)) {
-    p <- first_false(agree_status)
-    res <- get_player_move(game, p, strategy, agree_status)
+    selected_player <- first_false(agree_status)
+    move <- get_player_move(game, selected_player, strategy, agree_status)
     iteration_count <- iteration_count + 1L
 
-    strategy     <- res$strategy
-    agree_status <- res$agree_status
+    strategy     <- move$strategy
+    agree_status <- move$agree_status
 
-    if (res$is_new) {
+    if (move$is_new) {
       used_strategies <- rbind(used_strategies, strategy)
 
       # Count the number of movements
@@ -135,7 +102,20 @@ play_game <- function(n_players, game) {
 
       # Break if loop detected
       if (has_dup_rows(used_strategies)) {
-        return(c("Equilibrium not found", iteration_count, movements_count))
+        if(nrow(used_strategies) < 2^n_players){ # Still profiles to check
+          # Delete the last row (the duplicate)
+          used_strategies <- used_strategies[-nrow(used_strategies), ]
+          
+          # Find a new strategy profile to check
+          strategy <- find_extra_row(full_game, used_strategies) # Try a new strategy profile
+          used_strategies <- rbind(used_strategies, strategy) # Add it to the used strategies
+          agree_status <- rep(FALSE, n_players) # Everyone disagrees
+          movements_count <- movements_count + 1L # Count this as a movement
+          iteration_count <- iteration_count + 1L # Count this as an iteration
+        } else {
+          # No new strategy profiles left to check
+          return(c("Equilibrium not found", iteration_count, movements_count))
+        }
       }
     }
   }
