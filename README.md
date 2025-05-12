@@ -43,21 +43,25 @@ To investigate best-response dynamics, we simulate an iterative play process in 
 
 **Initialization:**
 - Start at a fixed initial strategy profile. In our code, we use the profile where every player initially plays strategy 0 as the starting point. Given the fact that the utilities are random, this profile is not special.
+- Initialize a logical vector that indicates whether each player agrees with the strategy. Set all values to `FALSE` initially.
+- Maintain a set to record all visited strategy profiles to detect cycles and track explored profiles.
 
-- Initialize a logical vector that indicates whether each player agrees with the strategy. Set all values to `FALSE` initially.  
+**Best-Response Update Loop:**
+- Repeatedly allow players to update their strategies one at a time:
+  - For each iteration, choose the first player that doesn’t agree and evaluate whether that player can improve their payoff by switching to their other strategy. Since there are only two strategies (0 or 1), this check is straightforward: we compare the player's payoff in the current profile vs. what it would be if they flipped their strategy.
+  - If switching strategies yields a strictly higher payoff for that player (i.e., it’s a best response), then update the player’s strategy to that best response, change the `agree` status to `FALSE` for all other players, and add the new profile to the set of visited profiles. If switching does not improve that player’s payoff (i.e., the current strategy is already a best response or tied as the best), then the player stays with the current strategy, changes its `agree` status to `TRUE`, and leaves the other players’ statuses unchanged.
+- Continue to the next player and repeat the check.
 
-- **Best-Response Update Loop**: Repeatedly allow players to update their strategies one at a time:
-  - For each iteration, choose the first player that doesn´t agree and evaluate whether that player can improve their payoff by switching to their other strategy. Since there are only two strategies (0 or 1), this check is straightforward: we compare the player's payoff in the current profile vs. what it would be if they flipped their strategy.
-  - If switching strategies yields a strictly higher payoff for that player (i.e., it’s a best response), then update the player’s strategy to that best response and change the `agree` status to `FALSE` for all other players. If switching does not improve that player’s payoff (i.e., the current strategy is already a best response or tied as the best), then the player stays with the current strategy, changes its `agree` status to `TRUE`, and leaves the other players’ statuses unchanged.
-- Continue to the next player and repeat the check. 
-
-- **Termination Conditions**: The iterative process continues until one of two stopping conditions is met:
+**Termination Conditions:**
+- The iterative process continues until one of two stopping conditions is met:
   - **Convergence to Equilibrium**: If in a full cycle of updates no player changes their strategy, that means every player is best-responding to the others. At this point, the profile is a Nash equilibrium, and the dynamic has converged. We record that a PSNE was found.
-  - **Cycle Detection**: If the process produces a strategy profile that has occurred previously, we have entered a cycle. In other words, the dynamics are now repeating a prior state and will continue to loop endlessly without finding an equilibrium. When a repeat profile is detected, we terminate the simulation and record that it failed to converge (cyclic behavior). In practice, our code keeps a history (set) of visited profiles to quickly check for repetition. Because the game has a finite number of profiles ($2^n$), a cycle detection also implicitly serves as a safeguard against infinite loops—if no equilibrium exists, Poincaré recurrence guarantees some profile will eventually repeat.
+  - **Cycle Detection and Restart**: If the process encounters a strategy profile previously visited within the current trajectory, a cycle is detected. Instead of terminating, the algorithm selects a new, previously unvisited strategy profile (i.e., one not in the set of visited profiles from any trajectory) and restarts the best-response update loop from this profile, resetting the `agree` vector and trajectory-specific history. If no unvisited profiles remain (i.e., all $2^n$ profiles have been explored across one or more trajectories), the simulation terminates, concluding that no PSNE exists. In practice, our code maintains a history (set) of visited profiles across all trajectories to track explored profiles and ensure finite termination.
 
-- **Iteration Counting**: Throughout the loop, we count how many individual strategy updates (iterations) occur. This gives a measure of how long the dynamics ran before stopping. Convergence in very few iterations might indicate the game had an "easy" equilibrium that was quickly reached, whereas a long run that ends in a cycle indicates the dynamic wandered a lot without finding a stable point.
+**Iteration Counting:**
+- Throughout the loop, we track two metrics: *iterations* (the number of times a player is asked whether they want to change their strategy) and *movements* (the number of times a player actually changes their strategy). These metrics provide insight into the dynamics' duration and activity before stopping. A low iteration count with few movements might indicate an "easy" equilibrium reached quickly, whereas a high iteration count with many movements suggests the dynamic explored extensively without finding a stable point (PSNE).
 
-After setting up this process for one game, we repeat the simulation across many independent random games for each value of $n$ we are interested in. 
+**Simulation Across Games:**
+- After setting up this process for one game, we repeat the simulation across many independent random games for each value of $n$ we are interested in.
 
 ### Code
 
@@ -66,35 +70,28 @@ In the R code, the logic described above is implemented with the help of two scr
 - `functions.R`: This file contains helper functions for setting up and evaluating the game. For instance, it likely has a function to generate random payoff matrices for all players given $n$, and functions to compute a player's best response or to check if a profile is a NE. It may also contain the function that performs one iteration of the best-response update (choosing a player and possibly switching their strategy).
 - `best_response.R`: This is the main simulation script. It uses the functions defined in `functions.R` to run the best-response dynamics. It initializes the game, runs the iterative loop with the update rules, and monitors the stopping conditions. This script is also responsible for running multiple simulations (for statistical analysis) and recording the outcomes. In addition, `best_response.R` produces visualizations of the results and saves them to files.
 
-## Results
+## Results: 
 
-We analyzed the outcomes of the best-response dynamics over 100000 games and different numbers of players $n$. The findings align with expectations from game theory: as $n$ grows, the dynamics have a harder time finding an equilibrium. More formally, larger games are less likely to possess (and converge to) a pure Nash equilibrium, and the process tends to take more iterations to either find an equilibrium or to conclude it is cycling. Here we summarize the key observations:
-
-### Frequency of Convergence
-
-For small games, the best-response dynamics often converges to a PSNE. For example, with $n=2$ players (each with 2 strategies), the algorithm finds a PSNE in 87.3% of the games, while with $n=12$ players, less than 1% of the games converge to a PSNE. Note that the algorithm cannot conclude there are no PSNEs; it only determines that no PSNE was found along the trajectory. 
-
-### Iterations Distribution
-
-Along with a decreased chance of success, larger games required more update steps on average before the simulation stopped. For $n=2$, if an equilibrium existed, it was found very quickly (In 2 to or 4 iterations of play). Even cycles in 2-player games were short (in a 2-player game with no equilibrium, the two players simply alternate their moves, leading to an immediate 2-cycle). In contrast, for $n=10$ players, the sequences of best-response moves before detecting a cycle were typically much longer. We observed a wide spread in the number of iterations for larger $n$. Some runs went on for more than a hundred of before a repeat profile was seen. The distribution of iteration counts shifted toward higher values as $n$ grew. This indicates that when an equilibrium is not quickly reachable, the dynamics can wander through many states—reflecting the potential exponential complexity of the state space. Below we provide example histograms of the number of iterations for different $n$ values.
+We analyzed the best-response dynamics over 10,000 games across varying numbers of players $n$, focusing on the number of iterations required for the simulation to terminate. As $n$ increases, the dynamics generally require more update steps before stopping, reflecting the growing complexity of the state space. For $n=2$, when an equilibrium exists, it is typically found within 2 to 4 iterations, and cycles in games without an equilibrium are short (e.g., a 2-cycle where players alternate moves). In contrast, for $n=10$, the sequences of best-response moves are significantly longer, often exceeding 100 iterations before a repeat profile is detected. The distribution of iteration counts shifts toward higher values with larger $n$, indicating that the dynamics can explore many states when an equilibrium is not quickly reachable. Example histograms of iteration counts for different $n$ values are provided below.
 
 ### Example Plots
 
-The repository includes plots visualizing these results for various $n$. In the `plots/` directory. Each plot corresponds to 100000 simulations at a given number of players and shows the fraction of runs that converged to a PSNE, along with a histogram of the iteration counts. Below are the plots for $n=2$, $n=4$, and $n=10$, illustrating the trends described:
+The repository includes plots visualizing these results for various $n$. In the `plots/` directory. Each plot corresponds to 10,000 simulations at a given number of players and shows the fraction of runs that converged to a PSNE, along with a histogram of the iteration counts. Below are the plots for $n=2$, $n=4$, and $n=10$, illustrating the trends described:
 
 - For $n=2$ players: The plot shows that almost all runs converged, usually in very few iterations.  
   ![Simulation outcomes for n=2](plots/game_results_2_players.png)  
   **Figure 1**: Simulation outcomes for $n=2$.
 
-- For $n=4$ players: The plot illustrates a mix of outcomes. Many runs still found an equilibrium, but a significant number resulted in cycles. The distribution is about fifty-fifty. The iteration count histogram is more spread out compared to $n=2$, indicating some games took longer to resolve.  
+- For $n=4$ players: The plot illustrates a mix of outcomes. Many runs still found an equilibrium, but a significant number resulted in cycles. The distribution is about seventy-thirty. The iteration count histogram is more spread out compared to $n=2$, indicating some games took longer to resolve.  
   ![Simulation outcomes for n=4](plots/game_results_4_players.png)  
   **Figure 2**: Simulation outcomes for $n=4$.
 
-- For $n=12$ players: The plot highlights that convergence was very rare. Most simulations ended in cycling behavior, and the iteration counts were often quite large before a cycle was detected.  
-  ![Simulation outcomes for n=10](plots/game_results_12_players.png)  
-  **Figure 3**: Simulation outcomes for $n=12$. 
+- For $n=10$ players: The plot indicates that convergence was challenging. Most simulation iteration counts exceeded 1,000, even in games where an equilibrium exists. Interestingly, the proportion of games with an equilibrium does not drop significantly. As $n$ increases from 4 to 10, the percentage remains around 65% without a clear decreasing trend.
 
-These plots confirm that as the game grows more complex (in terms of number of players), finding a stable outcome via naive best-response play becomes significantly less likely and more time-consuming. In summary, small games may reach a stable equilibrium easily, but larger random games often exhibit persistent oscillations with no equilibrium, in line with theoretical expectations.
+  ![Simulation outcomes for n=10](plots/game_results_10_players.png)  
+  **Figure 3**: Simulation outcomes for $n=10$. 
+
+These plots confirm that as the game grows more complex (in terms of number of players), finding a stable outcome via naive best-response play becomes significantly less likely and more time and memory consuming. In summary, small games may reach a stable equilibrium easily, but larger random games often exhibit trajectories with persistent oscillations with no equilibrium, in line with theoretical expectations.
 
 ## Future work
 

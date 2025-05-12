@@ -1,11 +1,11 @@
 # Title: Game Theory Simulation
 # Parameters --------------------------------------------------------------
-n_players <- seq(2, 12, 2) # Number of players in the game
-n_games <- 1e5 # Simulations per player count
+n_players <- seq(2, 10, 1) # Number of players in the game
+n_games <- 1e4 # Simulations per player count
 set.seed(1804) # For reproducibility
 
 # Call functions 
-source("functions.R")
+source("game_functions.R")
 
 # Save the plots in a folder called plots
 

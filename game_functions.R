@@ -39,7 +39,9 @@ set_game <- function(n_players, strategies = 2) {
 #' g <- set_game(3)
 #' get_player_move(g, 1, c(0,0,0), c(FALSE, FALSE, FALSE))
 #' @export
-get_player_move <- function(game, selected_player, strategy, agree_status, is_new = FALSE) {
+get_player_move <- function(game, selected_player, strategy, agree_status) {
+  is_new = FALSE # initially, no one has changed their strategy
+
   idx_current <- as.list(c(selected_player, strategy + 1L))
   u_current   <- do.call("[", c(list(game), idx_current))
 
@@ -50,11 +52,11 @@ get_player_move <- function(game, selected_player, strategy, agree_status, is_ne
 
   if (u_change > u_current) {
     strategy[selected_player] <- changed_strat[selected_player]
-    agree_status[] <- FALSE
-    agree_status[selected_player] <- TRUE
+    agree_status[] <- FALSE # Everyone disagrees...
+    agree_status[selected_player] <- TRUE # ...except the one who changed
     is_new <- TRUE
   } else {
-    agree_status[selected_player] <- TRUE
+    agree_status[selected_player] <- TRUE # The player agrees with the current strategy
   }
 
   list(
@@ -135,6 +137,7 @@ play_game <- function(n_players, game) {
 #' run_many_games(10, 4)
 #' @export
 run_many_games <- function(n_games, n_players) {
+  t_0 <- Sys.time()
   mat <- t(sapply(
     seq_len(n_games),
     function(i) {
@@ -143,11 +146,13 @@ run_many_games <- function(n_games, n_players) {
     }
   ))
   df <- as.data.frame(mat, stringsAsFactors = FALSE)
-  names(df) <- c("status", "iterations")
+  names(df) <- c("status", "iterations", "movements")
 
   # order the data frame by status (alphabetically)
   df <- df[order(df$status), ]
   df$iterations <- as.numeric(df$iterations)
+  t_1 <- Sys.time()
+  cat("Time taken:", round(difftime(t_1, t_0, units = "mins"), 2), "minutes\n")
   df
 }
 
